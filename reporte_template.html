@@ -5,14 +5,10 @@
 </head>
 <body>
     <h1>Reporte de Transacciones</h1>
-    <p><strong>Ingresos totales:</strong> ${{ ingresos }}</p>
-    <p><strong>Gastos totales:</strong> ${{ gastos }}</p>
-    <p><strong>Balance neto:</strong> ${{ balance }}</p>
-
-    <h2>Gráfica de transacciones</h2>
-    <img src="file:///C:/Users/Admin/Desktop/proyecto_uni/grafico.png" alt="Gráfico de Transacciones">
-
-    <h2>Tabla de transacciones</h2>
+    <p><strong>Ingresos:</strong> ${{ ingresos }}</p>
+    <p><strong>Gastos:</strong> ${{ gastos }}</p>
+    <p><strong>Balance:</strong> ${{ balance }}</p>
+    <h2>Tabla</h2>
     {{ tabla | safe }}
 </body>
 </html>
