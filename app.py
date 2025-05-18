@@ -6,6 +6,7 @@ import pdfkit
 import telegram
 from jinja2 import Template
 from io import BytesIO
+import os
 
 PDF_CONFIG = None  # wkhtmltopdf desactivado en Render
 
@@ -79,3 +80,9 @@ if df is not None and not df.empty:
             f.seek(0)
 #             bot.send_document(chat_id=telegram_id.strip(), document=f)
             st.success("Enviado por Telegram exitosamente.")
+BOT_TOKEN = os.environ.get("BOT_TOKEN")
+if BOT_TOKEN:
+    bot = telegram.Bot(token=BOT_TOKEN)
+    # código para enviar documento...
+else:
+    st.warning("⚠️ BOT_TOKEN no está configurado. No se enviará nada por Telegram.")
