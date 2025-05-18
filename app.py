@@ -75,7 +75,7 @@ if df is not None and not df.empty:
         telegram_id = st.text_input("📨 Tu ID de Telegram (opcional)")
         enviar = st.checkbox("📤 Enviar PDF por Telegram")
         if enviar and telegram_id and st.button("Enviar ahora"):
-            bot = telegram.Bot(token="TU_TOKEN_AQUI")
+            bot = telegram.Bot(token=os.environ.get("BOT_TOKEN"))
             f.seek(0)
 #             bot.send_document(chat_id=telegram_id.strip(), document=f)
             st.success("Enviado por Telegram exitosamente.")
