@@ -1,11 +1,11 @@
 
-
 import streamlit as st 
 import pandas as pd
 import matplotlib.pyplot as plt
 import telegram
 from jinja2 import Template
 import os
+from resumen_automatico import generar_resumen
 
 PDF_CONFIG = None  # wkhtmltopdf desactivado en Render
 
@@ -51,6 +51,8 @@ if df is not None and not df.empty:
     st.write(f"**Balance:** ${balance:.2f}")
     st.dataframe(df)
 
+    resumen_automatico = generar_resumen(df, ingresos, gastos, balance)
+
     st.subheader("📈 Gráfico")
     totales = df.groupby("tipo")["monto"].sum()
     fig, ax = plt.subplots()
@@ -60,12 +62,15 @@ if df is not None and not df.empty:
     try:
         with open("reporte_template.html", "r", encoding="utf-8") as f:
             template = Template(f.read())
+
         html_render = template.render(
             ingresos=f"{ingresos:.2f}",
             gastos=f"{-gastos:.2f}",
             balance=f"{balance:.2f}",
-            tabla=df.to_html(index=False)
+            tabla=df.to_html(index=False),
+            resumen_automatico=resumen_automatico
         )
+
         with open("reporte_generado.html", "w", encoding="utf-8") as f:
             f.write(html_render)
     except Exception as e:
@@ -83,3 +88,8 @@ if df is not None and not df.empty:
                 st.success("📤 PDF enviado por Telegram.")
         else:
             st.warning("⚠️ No se generó el archivo PDF porque hubo un error en el HTML.")
+
+
+
+
+
