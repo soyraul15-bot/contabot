@@ -1,11 +1,10 @@
 
-import streamlit as st
+
+import streamlit as st 
 import pandas as pd
 import matplotlib.pyplot as plt
-import pdfkit
 import telegram
 from jinja2 import Template
-from io import BytesIO
 import os
 
 PDF_CONFIG = None  # wkhtmltopdf desactivado en Render
@@ -58,36 +57,29 @@ if df is not None and not df.empty:
     totales.plot(kind="bar", ax=ax)
     st.pyplot(fig)
 
-    with open("reporte_template.html", "r", encoding="utf-8") as f:
-        template = Template(f.read())
-    html_render = template.render(
-        ingresos=f"{ingresos:.2f}",
-        gastos=f"{-gastos:.2f}",
-        balance=f"{balance:.2f}",
-        tabla=df.to_html(index=False)
-    )
-    with open("reporte_generado.html", "w", encoding="utf-8") as f:
-        f.write(html_render)
+    try:
+        with open("reporte_template.html", "r", encoding="utf-8") as f:
+            template = Template(f.read())
+        html_render = template.render(
+            ingresos=f"{ingresos:.2f}",
+            gastos=f"{-gastos:.2f}",
+            balance=f"{balance:.2f}",
+            tabla=df.to_html(index=False)
+        )
+        with open("reporte_generado.html", "w", encoding="utf-8") as f:
+            f.write(html_render)
+    except Exception as e:
+        st.error(f"⚠️ Error generando el HTML del reporte: {e}")
+        html_render = None
 
-#     pdfkit.from_file("reporte_generado.html", "reporte_final.pdf", configuration=PDF_CONFIG, options={"enable-local-file-access": ""})
-#     with open("reporte_final.pdf", "rb") as f:
-#         st.download_button("📥 Descargar PDF", f, file_name="reporte_final.pdf")
-
-        telegram_id = st.text_input("📨 Tu ID de Telegram (opcional)")
-        enviar = st.checkbox("📤 Enviar PDF por Telegram")
-        if enviar and telegram_id and st.button("Enviar ahora"):
+    telegram_id = st.text_input("📨 Tu ID de Telegram (opcional)")
+    enviar = st.checkbox("📤 Enviar PDF por Telegram")
+    if enviar and telegram_id and st.button("Enviar ahora"):
+        if html_render:
             bot = telegram.Bot(token=os.environ.get("BOT_TOKEN"))
-            f.seek(0)
-#             bot.send_document(chat_id=telegram_id.strip(), document=f)
-            st.success("Enviado por Telegram exitosamente.")
-with open("reporte_generado.html", "w", encoding="utf-8") as f:
-    f.write(html_render)
-
-telegram_id = st.text_input("📨 Tu ID de Telegram (opcional)")
-enviar = st.checkbox("📤 Enviar PDF por Telegram")
-if enviar and telegram_id and st.button("Enviar ahora"):
-    bot = telegram.Bot(token=os.environ.get("BOT_TOKEN"))
-    with open("reporte_generado.html", "rb") as f:
-        f.seek(0)
-        bot.send_document(chat_id=telegram_id.strip(), document=f)
-        st.success("📤 PDF enviado por Telegram.")
+            with open("reporte_generado.html", "rb") as f:
+                f.seek(0)
+                bot.send_document(chat_id=telegram_id.strip(), document=f)
+                st.success("📤 PDF enviado por Telegram.")
+        else:
+            st.warning("⚠️ No se generó el archivo PDF porque hubo un error en el HTML.")
