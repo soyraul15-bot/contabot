@@ -80,9 +80,14 @@ if df is not None and not df.empty:
             f.seek(0)
 #             bot.send_document(chat_id=telegram_id.strip(), document=f)
             st.success("Enviado por Telegram exitosamente.")
-BOT_TOKEN = os.environ.get("BOT_TOKEN")
-if BOT_TOKEN:
-    bot = telegram.Bot(token=BOT_TOKEN)
-    # código para enviar documento...
-else:
-    st.warning("⚠️ BOT_TOKEN no está configurado. No se enviará nada por Telegram.")
+with open("reporte_generado.html", "w", encoding="utf-8") as f:
+    f.write(html_render)
+
+telegram_id = st.text_input("📨 Tu ID de Telegram (opcional)")
+enviar = st.checkbox("📤 Enviar PDF por Telegram")
+if enviar and telegram_id and st.button("Enviar ahora"):
+    bot = telegram.Bot(token=os.environ.get("BOT_TOKEN"))
+    with open("reporte_generado.html", "rb") as f:
+        f.seek(0)
+        bot.send_document(chat_id=telegram_id.strip(), document=f)
+        st.success("📤 PDF enviado por Telegram.")
