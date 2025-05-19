@@ -3,7 +3,7 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Reporte Contable Avanzado</title>
+    <title>Reporte Contable Completo</title>
     <style>
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -11,20 +11,14 @@
             padding: 40px;
             color: #333;
         }
-        h1 {
+        h1, h2 {
             color: #2d3436;
-            border-bottom: 2px solid #2d3436;
-            padding-bottom: 10px;
         }
         .resumen {
             background: #dfe6e9;
             padding: 20px;
             border-radius: 8px;
             margin-bottom: 30px;
-        }
-        .resumen p {
-            font-size: 18px;
-            margin: 8px 0;
         }
         table {
             width: 100%;
@@ -64,6 +58,16 @@
     <h2>📋 Detalle de Transacciones</h2>
     {{ tabla | safe }}
 
+    {% if estado_resultados %}
+    <h2>📄 Estado de Resultados</h2>
+    <ul>
+        <li><strong>Ingresos:</strong> ${{ estado_resultados.ingresos }}</li>
+        <li><strong>Costos Operativos:</strong> ${{ estado_resultados.costos_operativos }}</li>
+        <li><strong>Gastos Administrativos:</strong> ${{ estado_resultados.gastos_admin }}</li>
+        <li><strong>Utilidad Neta:</strong> ${{ estado_resultados.utilidad }}</li>
+    </ul>
+    {% endif %}
+
     {% if resumen_automatico %}
     <h2>🧠 Resumen Inteligente</h2>
     <p>{{ resumen_automatico }}</p>
@@ -75,7 +79,7 @@
     {% endif %}
 
     <div class="footer">
-        Generado por ContaBot AI – Tu asistente financiero 🤖
+        Generado por ContaBot AI – Tu asistente contable 🤖
     </div>
 
 </body>
