@@ -1,7 +1,4 @@
-# Generar archivo final corregido: app_push_estado.py
-from pathlib import Path
 
-codigo_final_estado = '''
 import streamlit as st 
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -36,7 +33,7 @@ elif modo == "Llenar formulario manual":
     df = pd.DataFrame(data)
 
 def generar_recomendacion_ai(df, ingresos, gastos, balance, resumen_texto):
-    prompt = f"""
+    prompt = f'''
     Eres un asesor financiero. Resume y da consejos sobre este reporte:
 
     Ingresos: {ingresos}
@@ -45,7 +42,7 @@ def generar_recomendacion_ai(df, ingresos, gastos, balance, resumen_texto):
     Detalle: {resumen_texto}
 
     Da consejos útiles y simples para mejorar las finanzas del usuario.
-    """
+    '''
     openai.api_key = os.environ.get("OPENAI_API_KEY")
     response = openai.ChatCompletion.create(
         model="gpt-3.5-turbo",
@@ -128,8 +125,3 @@ Utilidad Neta:          ${estado["utilidad"]:.2f}
                 st.success("📤 PDF enviado por Telegram.")
         else:
             st.warning("⚠️ No se generó el archivo PDF porque hubo un error en el HTML.")
-'''
-
-Path("/mnt/data/app_push_estado.py").write_text(codigo_final_estado)
-
-"/mnt/data/app_push_estado.py listo para hacer git push sin errores de indentación."
