@@ -1,14 +1,16 @@
+# Generar archivo final corregido: app_push_estado.py
+from pathlib import Path
 
+codigo_final_estado = '''
 import streamlit as st 
 import pandas as pd
 import matplotlib.pyplot as plt
 import telegram
+import openai
 from jinja2 import Template
 import os
 from resumen_automatico import generar_resumen
-import openai
 from estado_resultados import generar_estado_resultados
-
 
 PDF_CONFIG = None  # wkhtmltopdf desactivado en Render
 
@@ -32,6 +34,24 @@ elif modo == "Llenar formulario manual":
         monto = st.number_input(f"💰 Monto {i+1}", key=f"monto_{i}", format="%.2f")
         data.append({"fecha": fecha, "descripcion": descripcion, "monto": monto})
     df = pd.DataFrame(data)
+
+def generar_recomendacion_ai(df, ingresos, gastos, balance, resumen_texto):
+    prompt = f"""
+    Eres un asesor financiero. Resume y da consejos sobre este reporte:
+
+    Ingresos: {ingresos}
+    Gastos: {gastos}
+    Balance: {balance}
+    Detalle: {resumen_texto}
+
+    Da consejos útiles y simples para mejorar las finanzas del usuario.
+    """
+    openai.api_key = os.environ.get("OPENAI_API_KEY")
+    response = openai.ChatCompletion.create(
+        model="gpt-3.5-turbo",
+        messages=[{"role": "user", "content": prompt}]
+    )
+    return response.choices[0].message.content
 
 if df is not None and not df.empty:
     def clasificar(desc):
@@ -57,37 +77,39 @@ if df is not None and not df.empty:
     resumen_automatico = generar_resumen(df, ingresos, gastos, balance)
     estado = generar_estado_resultados(df)
 
-
     st.subheader("📈 Gráfico")
     totales = df.groupby("tipo")["monto"].sum()
     fig, ax = plt.subplots()
     totales.plot(kind="bar", ax=ax)
     st.pyplot(fig)
+
     st.subheader("🧠 Resumen Inteligente")
     st.info(resumen_automatico)
+
     st.subheader("📄 Estado de Resultados")
     st.code(f"""
-    Ingresos:               ${estado["ingresos"]:.2f}
-    Costos Operativos:      ${estado["costos_operativos"]:.2f}
-    Gastos Administrativos: ${estado["gastos_admin"]:.2f}
-    ------------------------------------------
-    Utilidad Neta:          ${estado["utilidad"]:.2f}
-    """)
- 
+Ingresos:               ${estado["ingresos"]:.2f}
+Costos Operativos:      ${estado["costos_operativos"]:.2f}
+Gastos Administrativos: ${estado["gastos_admin"]:.2f}
+------------------------------------------
+Utilidad Neta:          ${estado["utilidad"]:.2f}
+""")
+
     try:
         with open("reporte_template.html", "r", encoding="utf-8") as f:
             template = Template(f.read())
 
-       html_render = template.render(
-       ingresos=f"{ingresos:.2f}",
-       gastos=f"{-gastos:.2f}",
-       balance=f"{balance:.2f}",
-       tabla=df.to_html(index=False),
-       resumen_automatico=resumen_automatico,
-       recomendaciones_ai=recomendaciones_ai,
-       estado_resultados=estado  # 👈 ESTA ES LA LÍNEA CLAVE QUE ESTÁS AGREGANDO
-)
+        recomendaciones_ai = generar_recomendacion_ai(df, ingresos, gastos, balance, resumen_automatico)
 
+        html_render = template.render(
+            ingresos=f"{ingresos:.2f}",
+            gastos=f"{-gastos:.2f}",
+            balance=f"{balance:.2f}",
+            tabla=df.to_html(index=False),
+            resumen_automatico=resumen_automatico,
+            recomendaciones_ai=recomendaciones_ai,
+            estado_resultados=estado
+        )
 
         with open("reporte_generado.html", "w", encoding="utf-8") as f:
             f.write(html_render)
@@ -106,22 +128,8 @@ if df is not None and not df.empty:
                 st.success("📤 PDF enviado por Telegram.")
         else:
             st.warning("⚠️ No se generó el archivo PDF porque hubo un error en el HTML.")
+'''
 
-def generar_recomendacion_ai(df, ingresos, gastos, balance, resumen_texto):
-    prompt = f"""
-    Eres un asesor financiero. Resume y da consejos sobre este reporte:
-    
-    Ingresos: {ingresos}
-    Gastos: {gastos}
-    Balance: {balance}
-    Detalle: {resumen_texto}
-    
-    Da consejos útiles y simples para mejorar las finanzas del usuario.
-    """
-    openai.api_key = os.environ.get("OPENAI_API_KEY")
-    response = openai.ChatCompletion.create(
-        model="gpt-3.5-turbo",
-        messages=[{"role": "user", "content": prompt}]
-    )
-    return response.choices[0].message.content
-	
+Path("/mnt/data/app_push_estado.py").write_text(codigo_final_estado)
+
+"/mnt/data/app_push_estado.py listo para hacer git push sin errores de indentación."
