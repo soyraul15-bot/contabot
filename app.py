@@ -4,12 +4,13 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import telegram
 import openai
-from openai import OpenAI
-client = OpenAI(api_key=os.environ.get("OPENAI_API_KEY"))
 from jinja2 import Template
 import os
 from resumen_automatico import generar_resumen
 from estado_resultados import generar_estado_resultados
+
+# Configuración para OpenAI versión 0.28
+openai.api_key = os.environ.get("OPENAI_API_KEY")
 
 PDF_CONFIG = None  # wkhtmltopdf desactivado en Render
 
@@ -35,7 +36,7 @@ elif modo == "Llenar formulario manual":
     df = pd.DataFrame(data)
 
 def generar_recomendacion_ai(df, ingresos, gastos, balance, resumen_texto):
-    prompt = f"""
+    prompt = f'''
     Eres un asesor financiero. Resume y da consejos sobre este reporte:
 
     Ingresos: {ingresos}
@@ -44,13 +45,12 @@ def generar_recomendacion_ai(df, ingresos, gastos, balance, resumen_texto):
     Detalle: {resumen_texto}
 
     Da consejos útiles y simples para mejorar las finanzas del usuario.
-    """
-    response = client.chat.completions.create(
+    '''
+    response = openai.ChatCompletion.create(
         model="gpt-3.5-turbo",
         messages=[{"role": "user", "content": prompt}]
     )
     return response.choices[0].message.content
-
 
 if df is not None and not df.empty:
     def clasificar(desc):
