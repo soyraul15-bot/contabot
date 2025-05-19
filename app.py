@@ -4,7 +4,8 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import telegram
 import openai
-client = openai.OpenAI(api_key=os.environ.get("OPENAI_API_KEY"))
+from openai import OpenAI
+client = OpenAI(api_key=os.environ.get("OPENAI_API_KEY"))
 from jinja2 import Template
 import os
 from resumen_automatico import generar_resumen
