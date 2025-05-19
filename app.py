@@ -7,6 +7,8 @@ from jinja2 import Template
 import os
 from resumen_automatico import generar_resumen
 import openai
+from estado_resultados import generar_estado_resultados
+
 
 PDF_CONFIG = None  # wkhtmltopdf desactivado en Render
 
@@ -53,24 +55,39 @@ if df is not None and not df.empty:
     st.dataframe(df)
 
     resumen_automatico = generar_resumen(df, ingresos, gastos, balance)
+    estado = generar_estado_resultados(df)
+
 
     st.subheader("📈 Gráfico")
     totales = df.groupby("tipo")["monto"].sum()
     fig, ax = plt.subplots()
     totales.plot(kind="bar", ax=ax)
     st.pyplot(fig)
-
+    st.subheader("🧠 Resumen Inteligente")
+    st.info(resumen_automatico)
+    st.subheader("📄 Estado de Resultados")
+    st.code(f"""
+    Ingresos:               ${estado["ingresos"]:.2f}
+    Costos Operativos:      ${estado["costos_operativos"]:.2f}
+    Gastos Administrativos: ${estado["gastos_admin"]:.2f}
+    ------------------------------------------
+    Utilidad Neta:          ${estado["utilidad"]:.2f}
+    """)
+ 
     try:
         with open("reporte_template.html", "r", encoding="utf-8") as f:
             template = Template(f.read())
 
-        html_render = template.render(
-            ingresos=f"{ingresos:.2f}",
-            gastos=f"{-gastos:.2f}",
-            balance=f"{balance:.2f}",
-            tabla=df.to_html(index=False),
-            resumen_automatico=resumen_automatico
-        )
+       html_render = template.render(
+       ingresos=f"{ingresos:.2f}",
+       gastos=f"{-gastos:.2f}",
+       balance=f"{balance:.2f}",
+       tabla=df.to_html(index=False),
+       resumen_automatico=resumen_automatico,
+       recomendaciones_ai=recomendaciones_ai,
+       estado_resultados=estado  # 👈 ESTA ES LA LÍNEA CLAVE QUE ESTÁS AGREGANDO
+)
+
 
         with open("reporte_generado.html", "w", encoding="utf-8") as f:
             f.write(html_render)
