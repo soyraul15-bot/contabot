@@ -1,4 +1,7 @@
+# Modificar visualmente el app.py sin cambiar su lógica ni estructura
+from pathlib import Path
 
+app_impacto = """
 import streamlit as st 
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -12,9 +15,19 @@ from estado_resultados import generar_estado_resultados
 # Configuración para OpenAI versión 0.28
 openai.api_key = os.environ.get("OPENAI_API_KEY")
 
-PDF_CONFIG = None  # wkhtmltopdf desactivado en Render
+# ✅ Mejora visual
+st.set_page_config(page_title="ContaBot AI", page_icon="📊", layout="wide")
+
+st.markdown(\"""
+<style>
+.big-font {font-size:26px !important; text-align: center;}
+footer {visibility: hidden;}
+.block-container {padding-top: 2rem;}
+</style>
+\""", unsafe_allow_html=True)
 
 st.title("ContaBot AI – Reporte Contable Inteligente")
+st.markdown('<p class="big-font">Bienvenido a tu asistente financiero con IA 🤖</p>', unsafe_allow_html=True)
 
 modo = st.radio("¿Cómo deseas ingresar tus transacciones?", ["Subir archivo CSV", "Llenar formulario manual"])
 
@@ -67,7 +80,7 @@ if df is not None and not df.empty:
     gastos = df[df["tipo"] == "Gasto"]["monto"].sum()
     balance = ingresos + gastos
 
-    st.subheader("📊 Resumen")
+    st.subheader("📊 Resumen Financiero")
     st.write(f"**Ingresos:** ${ingresos:.2f}")
     st.write(f"**Gastos:** ${-gastos:.2f}")
     st.write(f"**Balance:** ${balance:.2f}")
@@ -76,23 +89,29 @@ if df is not None and not df.empty:
     resumen_automatico = generar_resumen(df, ingresos, gastos, balance)
     estado = generar_estado_resultados(df)
 
-    st.subheader("📈 Gráfico")
+    st.subheader("📈 Visualización")
     totales = df.groupby("tipo")["monto"].sum()
     fig, ax = plt.subplots()
     totales.plot(kind="bar", ax=ax)
     st.pyplot(fig)
 
     st.subheader("🧠 Resumen Inteligente")
-    st.info(resumen_automatico)
+    st.markdown(f"""
+    <div style='background-color:#1e3d59;padding:20px;border-radius:10px;color:#fff;font-size:16px'>
+    {resumen_automatico}
+    </div>
+    """, unsafe_allow_html=True)
 
     st.subheader("📄 Estado de Resultados")
-    st.code(f"""
+    st.markdown(f"""
+    <pre style='background-color:#f5f6fa;padding:15px;border-radius:8px;font-size:15px'>
 Ingresos:               ${estado["ingresos"]:.2f}
 Costos Operativos:      ${estado["costos_operativos"]:.2f}
 Gastos Administrativos: ${estado["gastos_admin"]:.2f}
 ------------------------------------------
 Utilidad Neta:          ${estado["utilidad"]:.2f}
-""")
+    </pre>
+    """, unsafe_allow_html=True)
 
     try:
         with open("reporte_template.html", "r", encoding="utf-8") as f:
@@ -127,3 +146,8 @@ Utilidad Neta:          ${estado["utilidad"]:.2f}
                 st.success("📤 PDF enviado por Telegram.")
         else:
             st.warning("⚠️ No se generó el archivo PDF porque hubo un error en el HTML.")
+"""
+
+Path("/mnt/data/app_impacto.py").write_text(app_impacto)
+
+"/mnt/data/app_impacto.py generado con diseño visual mejorado y estilo profesional."
