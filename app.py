@@ -1,7 +1,4 @@
-# Modificar visualmente el app.py sin cambiar su lógica ni estructura
-from pathlib import Path
 
-app_impacto = """
 import streamlit as st 
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -18,13 +15,13 @@ openai.api_key = os.environ.get("OPENAI_API_KEY")
 # ✅ Mejora visual
 st.set_page_config(page_title="ContaBot AI", page_icon="📊", layout="wide")
 
-st.markdown(\"""
+st.markdown("""
 <style>
 .big-font {font-size:26px !important; text-align: center;}
 footer {visibility: hidden;}
 .block-container {padding-top: 2rem;}
 </style>
-\""", unsafe_allow_html=True)
+""", unsafe_allow_html=True)
 
 st.title("ContaBot AI – Reporte Contable Inteligente")
 st.markdown('<p class="big-font">Bienvenido a tu asistente financiero con IA 🤖</p>', unsafe_allow_html=True)
@@ -96,11 +93,12 @@ if df is not None and not df.empty:
     st.pyplot(fig)
 
     st.subheader("🧠 Resumen Inteligente")
-    st.markdown(f"""
+    resumen_html = f"""
     <div style='background-color:#1e3d59;padding:20px;border-radius:10px;color:#fff;font-size:16px'>
     {resumen_automatico}
     </div>
-    """, unsafe_allow_html=True)
+    """
+    st.markdown(resumen_html, unsafe_allow_html=True)
 
     st.subheader("📄 Estado de Resultados")
     st.markdown(f"""
@@ -146,8 +144,3 @@ Utilidad Neta:          ${estado["utilidad"]:.2f}
                 st.success("📤 PDF enviado por Telegram.")
         else:
             st.warning("⚠️ No se generó el archivo PDF porque hubo un error en el HTML.")
-"""
-
-Path("/mnt/data/app_impacto.py").write_text(app_impacto)
-
-"/mnt/data/app_impacto.py generado con diseño visual mejorado y estilo profesional."
